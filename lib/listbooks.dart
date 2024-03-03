@@ -1,4 +1,8 @@
 import "package:flutter/material.dart";
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttersomeapp/bloc/book_bloc.dart';
+import 'package:fluttersomeapp/bloc/book_event.dart';
+import 'package:fluttersomeapp/bloc/book_state.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 /* 
@@ -41,6 +45,8 @@ Widget _Book(String name) {
 //https://stackoverflow.com/questions/67855344/flutter-how-to-map-list-of-array-to-widget
 
 class _PageDetails extends State<ListBooks> {
+  final bookBloc = BookBloc();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,13 +77,68 @@ class _PageDetails extends State<ListBooks> {
                             fontSize: 45,
                             color: Color(0xE8FFFFFF)))),
               ),
-              Column(children: users.map((e) => _Book(e)).toList())
+              Column(children: users.map((e) => _Book(e)).toList()),
+              BlocBuilder<BookBloc, BookState>(
+                  buildWhen: (previous, current) {
+                    print(previous.title);
+                    print(current.title);
+                    return true; // ta funkcja znaczy tyle co, wykona sie to zapytanie, za kazdym przerenderowaniem aplikacji
+                  }, // ta funkcja zawsze zwraca wartosc true
+                  bloc:
+                      bookBloc, // to odniesienie zwykle jest opcjonalne zwazajac na, to ze i tak moze po czasie wyszukac instancji
+                  builder: (context, state) {
+                    return Container(
+                        alignment: Alignment.center,
+                        height: 50,
+                        width: 200,
+                        padding: EdgeInsets.fromLTRB(10, 5, 0, 15),
+                        margin: EdgeInsets.only(bottom: 5, top: 5),
+                        color: Colors.amber,
+                        child: Text(state.title.toString()));
+                  }),
+              Center(
+                  child: TextButton(
+                      onPressed: () => {bookBloc.add(BookChangeName())},
+                      child: Text("Pokaz tytul"))),
+              Center(
+                  child: TextButton(
+                      onPressed: () => {
+                            bookBloc.add(BookAddFullNameAuthor())
+
+                            //context.read<BookBloc>()
+                            //.add(BookAddFullNameAuthor())
+                          },
+                      child: Text("Pokaz tytul i autora"))),
             ],
           )
         ]));
   }
 }
 
+// stara metoda na uzyskanie funkcji odpowiedzialnej za wywolanie funkcji bloc - bookBloc.add(BookAddFullNameAuthor())
+
+/* 
+
+funkcja odpowiadajaca za generowanie w czasie rzeczywistym na szablonie i strukturze strony aplikacji 
+naszych nowo utworzonych komponentow
+poprzez ich inicjalizacje za pomoca state management'u bloc
+
+
+BlocBuilder<NazwaBloc, NazwaStanu>(
+  bloc: nazwaBloc - instacja utworzona przez nas w pliku szablonu
+  builder:(context, state) {
+    return Text("
+
+      w tej funkcji mozemy przypisywac wlasne stany aplikacji:
+
+      state.nazwa__
+    
+    ")
+  }
+
+)
+
+*/
 
 // za pomoca google font's jestesmy w stanie efektywnie stylowac interfejsy
 

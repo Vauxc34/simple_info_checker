@@ -1,4 +1,6 @@
 import "package:flutter/material.dart";
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttersomeapp/bloc/book_bloc.dart';
 import 'package:fluttersomeapp/flights.dart';
 import 'package:fluttersomeapp/listbooks.dart';
 import 'package:fluttersomeapp/main.dart';
@@ -48,10 +50,17 @@ class _PageDetails extends State<Home> {
 
   @override
   void initState() {
-    pages = [StatusScreen(weather: widget.weather), ListBooks(), Flights()];
-    print(dotenv.env['ANOTHER_API_KEY']);
+    pages = [
+      StatusScreen(weather: widget.weather),
+      BlocProvider(create: (context) => BookBloc(), child: const ListBooks()),
+      Flights()
+    ];
     super.initState();
   }
+
+  // dzieki wykorzystaniu provider'a wyzej - jestesmy w stanie korzystac, ze stanu
+// bloc, w kazdym miejscu naszej aplikacji, gdyz wszystko jest przekazywane
+// przez nas w kontekscie wyzej
 
   /* 
   
@@ -91,3 +100,42 @@ class _PageDetails extends State<Home> {
         ));
   }
 }
+
+
+/* 
+
+
+Jezeli jeden provider nam nie wystarczy, to mozemy je spiac, w jeden fragment znany jako
+
+MultiBlocProvider(
+  providers: [
+    ...Providery
+  ]
+)
+
+
+jestesmy w stanie wywolac w strukturze, naszego widoku
+obiekt, odpowiedzialny za nasluchiwanie zdarzen 
+zwany jako BlocListener - zeby przebudowac komponent, powinno sie uzywac 
+metody child, na koncu bloku, w ktorej mozemy kolejno umiescic jakikolwiek element
+
+BlocListener<NazwaBloc, NazwaState> (
+  listenWhen: (prevState, currentState) => false/true
+  listener: (context, state) {
+    if(warunek) {
+      wywolanie jakiejkolwiek funkcji
+    }
+  }
+)
+
+BlocConsumer<NazwaBloc, NazwaState> (
+  listenWhen: element funkcji wyzej
+  listener: (context, state) {
+    if(warunek) {
+      wywolanie jakiejkolwiek funkcji
+    }
+  }
+)
+builder: ...elementy interfejsu
+
+*/
